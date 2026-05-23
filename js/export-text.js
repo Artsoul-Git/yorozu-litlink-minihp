@@ -46,9 +46,10 @@
     return r.trim().replace(/\n{3,}/g, '\n\n');
   }
 
-  function addRect(s, x, y, w, h, fill, lineColor, lineW, rounding) {
+  function addRect(s, x, y, w, h, fill, lineColor, lineW, rounding, fillTransp) {
     var opts = { x: x, y: y, w: w, h: h };
     if (fill) opts.fill = { color: fill };
+    if (fill && fillTransp) opts.fill.transparency = fillTransp;
     if (lineColor) opts.line = { color: lineColor, width: lineW || 0.5 };
     if (rounding) opts.rectRadius = rounding;
     s.addShape('rect', opts);
@@ -162,7 +163,7 @@
 
   /* ── エンディングスライド ──────────────────────────────── */
   function buildEnding(pSlide, sec) {
-    pSlide.background = { color: '1A1A1A' };
+    pSlide.background = { color: C.dark };  /* CSS: .slide-ending { background: #3d5411 } */
 
     var main = sec.querySelector('.s-ending-main');
     var subs = sec.querySelectorAll('.s-ending-sub');
@@ -174,19 +175,19 @@
       y += 0.88;
     }
 
-    addRect(pSlide, 3.5, y, 3, 0.06, C.white, null, 0, 0);
-    y += 0.22;
+    addRect(pSlide, 3.5, y, 3, 0.04, C.white, null, 0, 0, 60);  /* rgba(255,255,255,.4) */
+    y += 0.2;
 
     var subArr = Array.prototype.slice.call(subs);
     subArr.forEach(function (sub, i) {
       var t = txt(sub);
       if (!t) return;
       var h = 0.95;
-      addTxt(pSlide, t, 0.4, y, W - 0.8, h, { fontSize: 12, color: C.white, align: 'center', transparency: 28, lineSpacingMultiple: 1.5 });
+      addTxt(pSlide, t, 0.4, y, W - 0.8, h, { fontSize: 12, color: C.white, align: 'center', transparency: 40, lineSpacingMultiple: 1.5 });
       y += h;
       if (i < subArr.length - 1) {
-        addRect(pSlide, 3.5, y, 3, 0.06, C.white, null, 0, 0);
-        y += 0.22;
+        addRect(pSlide, 3.5, y, 3, 0.04, C.white, null, 0, 0, 60);
+        y += 0.2;
       }
     });
   }
@@ -200,9 +201,9 @@
     var cY     = 0.12;
 
     if (hdrEl) {
-      addTxt(pSlide, txt(hdrEl), 0.38, 0.1, W - 0.76, 0.5, { fontSize: 19, color: C.text, bold: true });
-      // 見出し下線（グリーン）
-      addRect(pSlide, 0, 0.62, W, 0.055, C.text);
+      /* CSS: .slide-h2 { color: #6f911d } / .slide-header { border-bottom: solid #6f911d } */
+      addTxt(pSlide, txt(hdrEl), 0.38, 0.1, W - 0.76, 0.5, { fontSize: 19, color: C.green, bold: true });
+      addRect(pSlide, 0, 0.62, W, 0.03, C.green);
       cY = 0.76;
     }
 
