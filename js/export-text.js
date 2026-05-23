@@ -60,8 +60,11 @@
 
   function addTxt(s, text, x, y, w, h, opts) {
     if (!text) return;
-    var base = { x: x, y: y, w: w, h: h, fontFace: 'Noto Sans JP', shrinkText: true };
-    s.addText(text, Object.assign(base, opts));
+    var o = Object.assign({}, opts);
+    /* bold → Noto Sans JP Black でウェイトを管理。b="1" は使わない */
+    if (o.bold) { o.fontFace = 'Noto Sans JP Black'; delete o.bold; }
+    else if (!o.fontFace) { o.fontFace = 'Noto Sans JP'; }
+    s.addText(text, Object.assign({ x: x, y: y, w: w, h: h, shrinkText: true }, o));
   }
 
   /* ── カバースライド ────────────────────────────────────── */
@@ -108,19 +111,20 @@
       var runs = [];
       mainEl.childNodes.forEach(function (node) {
         if (node.nodeType === 3 && node.textContent.trim()) {
-          runs.push({ text: node.textContent, options: { bold: true } });
+          runs.push({ text: node.textContent, options: {} });
         } else if (node.nodeName === 'EM') {
-          runs.push({ text: node.textContent, options: { bold: true, underline: { type: 'sng', color: C.yellow } } });
+          runs.push({ text: node.textContent, options: { underline: { type: 'sng', color: C.yellow } } });
         } else if (node.nodeName === 'BR') {
-          runs.push({ text: '\n' });
+          runs.push({ text: '\n', options: {} });
         } else if (node.nodeName === 'SPAN' && node.textContent.trim()) {
-          runs.push({ text: node.textContent, options: { bold: true, fontSize: 20, transparency: 25 } });
+          runs.push({ text: node.textContent, options: { fontSize: 20, transparency: 25 } });
         }
       });
-      if (runs.length === 0) runs = [{ text: txt(main), options: { bold: true } }];
+      if (runs.length === 0) runs = [{ text: txt(main), options: {} }];
+      /* fontFace=Black でウェイト管理（bold属性は使わない） */
       pSlide.addText(runs, {
         x: 0.3, y: y, w: W - 0.6, h: 1.8,
-        fontSize: 30, color: C.white, fontFace: 'Noto Sans JP',
+        fontSize: 30, color: C.white, fontFace: 'Noto Sans JP Black',
         align: 'center', lineSpacingMultiple: 1.3, shrinkText: true,
       });
       y += 1.9;
