@@ -180,7 +180,7 @@
 
     var subArr = Array.prototype.slice.call(subs);
     subArr.forEach(function (sub, i) {
-      var t = txt(sub);
+      var t = txtBr(sub);
       if (!t) return;
       var h = 0.95;
       addTxt(pSlide, t, 0.4, y, W - 0.8, h, { fontSize: 12, color: C.white, align: 'center', transparency: 40, lineSpacingMultiple: 1.5 });
@@ -189,6 +189,55 @@
         addRect(pSlide, 3.5, y, 3, 0.04, C.white, null, 0, 0, 60);
         y += 0.2;
       }
+    });
+  }
+
+  /* ── callout + prompt + list 複合レンダラー（スライド16等） ── */
+  function renderCalloutPromptList(pSlide, callout, promptWrap, listEl, y0, avH) {
+    var y = y0 + 0.04;
+
+    var calloutH = callout ? 0.44 : 0;
+    if (callout) {
+      renderCallout(pSlide, txt(callout), y, calloutH);
+      y += calloutH + 0.1;
+    }
+
+    var items = listEl.querySelectorAll('li');
+    var listN = items.length || 1;
+    var listRowH = 0.46;
+    var listH = listN * listRowH + 0.08;
+
+    var promptH = avH - calloutH - (callout ? 0.1 : 0) - listH - 0.16;
+    promptH = Math.max(promptH, 0.6);
+
+    var pb = promptWrap.querySelector('.s-prompt-box');
+    if (pb) {
+      renderPromptBox(pSlide, txtBr(pb), y, promptH);
+      y += promptH + 0.12;
+    }
+
+    items.forEach(function (li) {
+      var t = txt(li);
+      var isHead    = li.classList.contains('s-list-head');
+      var isSub     = li.classList.contains('s-list-sub');
+      var isCallout = li.classList.contains('s-list-callout');
+      var isArrow   = li.classList.contains('s-list-arrow');
+      var rH = listRowH * 0.9;
+
+      if (isCallout) {
+        addRect(pSlide, 0.38, y, 9.24, rH, C.pale, C.line, 0.5, 0.04);
+        addRect(pSlide, 0.38, y, 0.1,  rH, C.green);
+        addTxt(pSlide, t, 0.6, y + 0.04, 8.9, rH * 0.82, { fontSize: 12, bold: true, color: C.text });
+      } else if (isHead) {
+        addTxt(pSlide, t, 0.38, y, 9.24, rH, { fontSize: 13, bold: true, color: C.text });
+      } else if (isSub) {
+        addTxt(pSlide, '─  ' + t, 0.82, y, 8.8, rH, { fontSize: 11, color: C.sub });
+      } else if (isArrow) {
+        addTxt(pSlide, '→  ' + t, 0.58, y, 9.0, rH, { fontSize: 12, color: C.sub });
+      } else {
+        addTxt(pSlide, '●  ' + t, 0.58, y, 9.0, rH, { fontSize: 12, color: C.text });
+      }
+      y += listRowH;
     });
   }
 
@@ -227,6 +276,8 @@
       renderCompare(pSlide, sCompare, cY, availH);
     else if (sNumList)
       renderNumList(pSlide, sNumList, cY, availH, callout);
+    else if (sList && promptWrap)
+      renderCalloutPromptList(pSlide, callout, promptWrap, sList, cY, availH);
     else if (sList)
       renderList(pSlide, sList, cY, availH);
     else if (sSteps)
@@ -358,11 +409,11 @@
       addRect(pSlide, 0.38, y, 9.24, rH, C.pale, null, 0, 0.04);
 
       if (numEl) {
-        addEllipse(pSlide, 0.45, y + (rH - 0.3) / 2, 0.15, C.green);
-        addTxt(pSlide, txt(numEl), 0.45, y + (rH - 0.3) / 2, 0.3, 0.3, { fontSize: 11, bold: true, color: C.white, align: 'center', valign: 'middle' });
+        addEllipse(pSlide, 0.44, y + (rH - 0.44) / 2, 0.22, C.green);
+        addTxt(pSlide, txt(numEl), 0.44, y + (rH - 0.44) / 2, 0.44, 0.44, { fontSize: 13, bold: true, color: C.white, align: 'center', valign: 'middle' });
       }
 
-      var tx = 0.9, tw = 8.6;
+      var tx = 1.05, tw = 8.45;
       if (txtEl)
         addTxt(pSlide, txt(txtEl), tx, y + 0.05, tw, subEl ? rH * 0.46 : rH * 0.85, { fontSize: 13, color: C.text });
       if (subEl)
@@ -378,7 +429,7 @@
 
     if (promptWrap) {
       var pb = promptWrap.querySelector('.s-prompt-box');
-      if (pb) renderPromptBox(pSlide, txt(pb), y + 0.06, promptH - 0.06);
+      if (pb) renderPromptBox(pSlide, txtBr(pb), y + 0.06, promptH - 0.06);
     }
   }
 
@@ -427,7 +478,7 @@
       var cy = y + 0.18;
 
       if (bdgEl) {
-        addRect(pSlide, xs[i] + 0.15, cy, colW - 0.3, 0.32, isPos ? C.text : C.grayMd, null, 0, 0.05);
+        addRect(pSlide, xs[i] + 0.15, cy, colW - 0.3, 0.32, isPos ? C.dark : C.grayMd, null, 0, 0.05);
         addTxt(pSlide, txt(bdgEl), xs[i] + 0.15, cy, colW - 0.3, 0.32, { fontSize: 11, bold: true, color: isPos ? C.white : C.sub, align: 'center', valign: 'middle' });
         cy += 0.42;
       }
@@ -451,7 +502,7 @@
       renderCallout(pSlide, txt(callout), y, calloutH);
       y += calloutH + 0.1;
     }
-    renderPromptBox(pSlide, txt(pbEl), y, avH - calloutH - 0.18);
+    renderPromptBox(pSlide, txtBr(pbEl), y, avH - calloutH - 0.18);
   }
 
   function renderCalloutOnly(pSlide, callout, y0, avH) {
