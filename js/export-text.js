@@ -34,6 +34,18 @@
     return el ? el.textContent.trim() : '';
   }
 
+  /* BR タグを \n に変換してテキスト抽出（複数行対応） */
+  function txtBr(el) {
+    if (!el) return '';
+    var r = '';
+    el.childNodes.forEach(function (n) {
+      if (n.nodeType === 3) r += n.textContent;
+      else if (n.nodeName === 'BR') r += '\n';
+      else r += txtBr(n);
+    });
+    return r.trim().replace(/\n{3,}/g, '\n\n');
+  }
+
   function addRect(s, x, y, w, h, fill, lineColor, lineW, rounding) {
     var opts = { x: x, y: y, w: w, h: h };
     if (fill) opts.fill = { color: fill };
@@ -48,7 +60,7 @@
 
   function addTxt(s, text, x, y, w, h, opts) {
     if (!text) return;
-    var base = { x: x, y: y, w: w, h: h, fontFace: 'Meiryo UI', shrinkText: true };
+    var base = { x: x, y: y, w: w, h: h, fontFace: 'Noto Sans JP', shrinkText: true };
     s.addText(text, Object.assign(base, opts));
   }
 
@@ -108,7 +120,7 @@
       if (runs.length === 0) runs = [{ text: txt(main), options: { bold: true } }];
       pSlide.addText(runs, {
         x: 0.3, y: y, w: W - 0.6, h: 1.8,
-        fontSize: 30, color: C.white, fontFace: 'Meiryo UI',
+        fontSize: 30, color: C.white, fontFace: 'Noto Sans JP',
         align: 'center', lineSpacingMultiple: 1.3, shrinkText: true,
       });
       y += 1.9;
@@ -313,7 +325,7 @@
       if (lblEl)
         addTxt(pSlide, txt(lblEl), x + 0.06, textY, stepW - 0.12, 0.48, { fontSize: 13, bold: true, color: C.text, align: 'center' });
       if (dscEl)
-        addTxt(pSlide, txt(dscEl), x + 0.06, textY + 0.5, stepW - 0.12, boxH - 1.4, { fontSize: 11, color: C.sub, align: 'center', lineSpacingMultiple: 1.3 });
+        addTxt(pSlide, txtBr(dscEl), x + 0.06, textY + 0.5, stepW - 0.12, boxH - 1.4, { fontSize: 11, color: C.sub, align: 'center', lineSpacingMultiple: 1.3 });
 
       if (i < n - 1)
         addTxt(pSlide, '▶', x + stepW, y + boxH / 2 - 0.15, arrowW, 0.3, { fontSize: 10, color: C.line, align: 'center' });
@@ -349,7 +361,7 @@
       if (txtEl)
         addTxt(pSlide, txt(txtEl), tx, y + 0.05, tw, subEl ? rH * 0.46 : rH * 0.85, { fontSize: 13, color: C.text });
       if (subEl)
-        addTxt(pSlide, txt(subEl), tx, y + rH * 0.48, tw, rH * 0.38, { fontSize: 10, color: C.sub });
+        addTxt(pSlide, txtBr(subEl), tx, y + rH * 0.48, tw, rH * 0.38, { fontSize: 10, color: C.sub });
 
       y += rowH;
     });
@@ -386,7 +398,7 @@
       if (ttlEl)
         addTxt(pSlide, txt(ttlEl), 1.08, y + 0.1, 8.46, rH * 0.44, { fontSize: 14, bold: true, color: C.text });
       if (dscEl)
-        addTxt(pSlide, txt(dscEl), 1.08, y + rH * 0.47, 8.46, rH * 0.44, { fontSize: 11, color: C.sub });
+        addTxt(pSlide, txtBr(dscEl), 1.08, y + rH * 0.47, 8.46, rH * 0.44, { fontSize: 11, color: C.sub });
 
       y += rowH;
     });
@@ -471,7 +483,7 @@
     }
 
     var pptx = new PptxGenJS();
-    pptx.layout  = 'LAYOUT_WIDE';
+    pptx.layout  = 'LAYOUT_16x9';  /* 10" × 5.625" — 座標系と一致させる */
     pptx.title   = document.title || SLUG;
     pptx.author  = '有限会社アートソウル';
     pptx.company = 'Artsoul';
